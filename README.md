@@ -4,9 +4,9 @@
 Auth Service is a Spring Boot microservice that provides authentication and user management functionality. It handles user registration, login, and JWT token generation for secure API access.
 
 ## Prerequisites
-- Java 11 or higher
+- Java 17 or higher
 - Maven 3.6+
-- Database (configured in `application.properties`)
+- MySQL 8.0+
 
 ## Getting Started
 
@@ -42,13 +42,58 @@ src/main/java/com/ksb/micro/auth_service/
 ```
 
 ## API Endpoints
-- `POST /auth/register` - Register a new user
-- `POST /auth/login` - Authenticate user and receive JWT token
+
+### Register User
+- **Endpoint**: `POST /auth/register`
+- **Description**: Register a new user account
+- **Request Body**:
+  ```json
+  {
+    "username": "string",
+    "password": "string"
+  }
+  ```
+- **Response**: 201 Created or 400 Bad Request
+
+### Login User
+- **Endpoint**: `POST /auth/login`
+- **Description**: Authenticate user and receive JWT token
+- **Request Body**:
+  ```json
+  {
+    "username": "string",
+    "password": "string"
+  }
+  ```
+- **Response**: 200 OK with token or 401 Unauthorized
+
+## Swagger/OpenAPI Documentation
+
+### Access Swagger UI
+Once the application is running, access the interactive API documentation at:
+- **Swagger UI**: `http://localhost:8083/swagger-ui.html`
+- **OpenAPI JSON**: `http://localhost:8083/v3/api-docs`
+
+The Swagger UI provides:
+- Interactive API endpoint exploration
+- Request/response schemas
+- Try-it-out functionality to test endpoints directly
+- Detailed operation descriptions
 
 ## Configuration
 Application settings are managed in `src/main/resources/application.properties`:
-- Database connection details
-- Server port
+- **Database**: MySQL connection details
+- **Server Port**: 8083
+- **Swagger**: OpenAPI documentation endpoint configuration
+
+## Technologies Used
+- Spring Boot 3.5.7
+- Spring Security
+- Spring Data JPA
+- MySQL Connector
+- JJWT for JWT token generation
+- SpringDoc OpenAPI (Swagger UI)
+- Lombok for code generation
 - JWT settings
 
 ## Building for Production
