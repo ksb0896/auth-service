@@ -1,0 +1,2 @@
+ALTER TABLE users
+ADD COLUMN last_login_date_time DATETIME DEFAULT NULL;

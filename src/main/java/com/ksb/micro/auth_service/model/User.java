@@ -31,4 +31,7 @@ public class User {
     @CreatedDate
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdDate;
+
+    @Column(nullable = false)
+    private LocalDateTime lastLoginDateTime;
 }
