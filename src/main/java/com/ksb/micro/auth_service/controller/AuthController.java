@@ -10,20 +10,26 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 //DTOs for request/response
-record LoginRequest(String username, String password){}
-record RegisterRequest(String username, String password){}
+record LoginRequest(@NotBlank String username, @NotBlank @Size(min = 4, max = 6) String password){}
+record RegisterRequest(@NotBlank String username, @NotBlank @Size(min = 4, max = 6) String password){}
 record AuthResponse(String token){}
 
 @RestController
@@ -46,16 +52,13 @@ public class AuthController {
             @ApiResponse(responseCode = "201", description = "User registered successfully"),
             @ApiResponse(responseCode = "400", description = "Username already taken")
     })
-    public ResponseEntity<String> registerUser(@RequestBody RegisterRequest request) { //@Valid
+    public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterRequest request) { //@Valid
         if (userRepository.findByUsername(request.username()).isPresent()) {
             return new ResponseEntity<>("Username is already taken", HttpStatus.BAD_REQUEST);
         }
 
         User user = new User();
         user.setUsername(request.username());
-//        if(request.password().length() <6 || request.password().length() >10){
-//            return new ResponseEntity<>("Password must be between 6 to 10 characters long", HttpStatus.BAD_REQUEST);
-//        }
         user.setPassword(passwordEncoder.encode(request.password())); // Hash the password
         userRepository.save(user);
 
@@ -72,21 +75,17 @@ public class AuthController {
     public ResponseEntity<AuthResponse> loginUser(@RequestBody LoginRequest request) {
         // Find the user by username
         User user = userRepository.findByUsername(request.username())
-                .orElse(null);
+                .orElseThrow(()-> new BadCredentialsException("Invalid username or password"));
 
-        if (user == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // User not found
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new BadCredentialsException("Invalid username or password");
         }
 
         // Check if the provided password matches the stored hash
-        if (passwordEncoder.matches(request.password(), user.getPassword())) {
-            // Passwords match, generate a token
-            String token = jwtUtil.generateToken(user.getUsername());
-            user.setLastLoginDateTime(LocalDateTime.now());
-            userRepository.save(user);
-            return ResponseEntity.ok(new AuthResponse(token));
-        } else {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+        String token = jwtUtil.generateToken(user.getUsername());
+        user.setLastLoginDateTime(LocalDateTime.now());
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new AuthResponse(token));
     }
 }
