@@ -20,12 +20,9 @@ public class User {
     private Long id;
 
     @Column(unique = true, nullable = false)
-//    @NotBlank(message = "Username cannot be blank")
     private String username;
 
     @Column(nullable = false)
-//    @NotBlank(message = "Password cannot be empty")
-//    @Size(min = 6, max = 10, message = "Password must be at between 6 to 10 characters long")
     private String password;
 
     @CreatedDate
