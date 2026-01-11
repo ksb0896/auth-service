@@ -49,7 +49,7 @@ public class AuthController {
             @ApiResponse(responseCode = "201", description = "User registered successfully"),
             @ApiResponse(responseCode = "400", description = "Username already taken")
     })
-    public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterRequest request) { //@Valid
+    public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterRequest request) {
         if (userRepository.findByUsername(request.username()).isPresent()) {
             return new ResponseEntity<>("Username is already taken", HttpStatus.BAD_REQUEST);
         }
